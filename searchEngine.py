@@ -195,42 +195,39 @@ def setTKwindow():
         query_tokens = standarizeQuery(user_query)
         results = open("url_results.txt", "a")   
         info=''
-        #try:
-        if len(query_tokens)>1:
-            useful_tokens = getUsefulTokens(query_tokens)
-            mydocID = getMultiQueryDocs(useful_tokens)
-        else:
-            mydocID = singleQueryDocs(query_tokens)
-        if len(mydocID) == 0:
+        try:
+            if len(query_tokens)>1:
+                useful_tokens = getUsefulTokens(query_tokens)
+                mydocID = getMultiQueryDocs(useful_tokens)
+            else:
+                mydocID = singleQueryDocs(query_tokens)
+            if len(mydocID) == 0:
+                info = "Sorry, no document are found based on your query..."
+                screenInfo.set(info)
+                label2.pack(side='top')
+            for x in mydocID[:20]:
+                key = x.replace("\\", "/")
+                url = "http://"+data[key]
+                htmlDir = open("webpages/WEBPAGES_RAW/"+key, "r")
+                soup = BeautifulSoup(htmlDir, "lxml")
+                if soup.title != None and soup.title.string != None:
+                    title = soup.title.string
+                else:
+                    title = 'No Title'
+                if len(url)>100:
+                    info = title+'\n'+url[:100]+"..."+"\n"
+                else:
+                    info = title+"\n"+url+"\n"
+                def callback(url):
+                    webbrowser.open_new_tab(url)
+                button = Button(scframe.interior, height = 2, width = 500, relief = FLAT,
+                            text=info, command = lambda url = url: webbrowser.open_new_tab(url))
+                button.pack( side = 'top')
+                results.write("key: "+user_query+"\t"+"url: "+url+"\n")
+        except:
             info = "Sorry, no document are found based on your query..."
             screenInfo.set(info)
             label2.pack(side='top')
-        print(mydocID)
-        for x in mydocID[:20]:
-            key = x.replace("\\", "/")
-            url = "http://"+data[key]
-            print(key, url)
-            htmlDir = open("webpages/WEBPAGES_RAW/"+key, "r")
-            soup = BeautifulSoup(htmlDir, "lxml")
-            if soup.title != None and soup.title.string != None:
-                title = soup.title.string
-            else:
-                title = 'No Title'
-            if len(url)>100:
-                info = title+'\n'+url[:100]+"..."+"\n"
-            else:
-                info = title+"\n"+url+"\n"
-            def callback(url):
-                print(key, url)
-                webbrowser.open_new_tab(url)
-            button = Button(scframe.interior, height = 2, width = 500, relief = FLAT,
-                            text=info, command = lambda url = url: webbrowser.open_new_tab(url))
-            button.pack( side = 'top')
-            results.write("key: "+user_query+"\t"+"url: "+url+"\n")
-##        except:
-##            info = "Sorry, no document are found based on your query..."
-##            screenInfo.set(info)
-##            label2.pack(side='top')
         results.close()
     button1 = Button(app, text = 'Search', width = 20, command = search)
     button1.pack(side='bottom', padx=15, pady = 15)
